@@ -9,6 +9,18 @@ class Jogo:
         self.categoria = categoria
         self.console = console
 
+class Usuario:
+    def __init__(self, id, nome, senha):
+        self.id = id
+        self.nome = nome
+        self.senha = senha
+
+usuario1 = Usuario('alexandre', 'Alexandre Palota', '123')
+usuario2 = Usuario('fulano', 'Fulano de Tal', '456')
+usuario3 = Usuario('beltrano', 'Beltrano de Tal', '789')
+
+usuarios = {usuario1.id: usuario1, usuario2.id: usuario2, usuario3.id: usuario3}
+
 jogo1 = Jogo('God of War', 'Aventura', 'Playstation 4')
 jogo2 = Jogo('Dark Souls 3', 'RPG ação', 'PC')
 jogo3 = Jogo('Sekiro', 'RPG Ação', 'PC')
@@ -42,13 +54,15 @@ def login():
 @app.route("/autenticar", methods=['POST'])
 def autenticar():
     proxima_pagina = request.form['proxima']
-    if 'mestra' == request.form['senha']:
-        session['usuario_logado'] = request.form['usuario']
-        flash(request.form['usuario'] + ' logou com sucesso!')
-        return redirect(proxima_pagina)
-    else:
-        flash('Não logado, tente novamente')
-        return redirect(url_for('login', proxima=proxima_pagina))
+
+    if request.form['usuario'] in usuarios:
+        usuario = usuarios[request.form['usuario']]
+        if usuario.senha == request.form['senha']:
+            session['usuario_logado'] = usuario.id
+            flash(usuario.nome + ' logou com sucesso!')
+            return redirect(proxima_pagina)
+    flash('Não logado, tente novamente')
+    return redirect(url_for('login', proxima=proxima_pagina))
 
 @app.route("/logout")
 def logout():
