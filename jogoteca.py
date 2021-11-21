@@ -2,19 +2,14 @@ from flask import Flask, render_template, request, redirect, session, flash, url
 import psycopg2
 
 from models import Usuario, Jogo
-from dao import JogoDao
+from dao import JogoDao, UsuarioDao
 
 app = Flask(__name__)
 app.secret_key = 'chave_secreta'
 app.config['DB_CONNECTION_STRING'] = 'dbname=jogoteca user=postgres password=postgres'
 
 jogo_dao = JogoDao(app.config['DB_CONNECTION_STRING'])
-
-usuario1 = Usuario('alexandre', 'Alexandre Palota', '123')
-usuario2 = Usuario('fulano', 'Fulano de Tal', '456')
-usuario3 = Usuario('beltrano', 'Beltrano de Tal', '789')
-
-usuarios = {usuario1.id: usuario1, usuario2.id: usuario2, usuario3.id: usuario3}
+usuario_dao = UsuarioDao(app.config['DB_CONNECTION_STRING'])
 
 @app.route("/")
 def index():
@@ -44,9 +39,8 @@ def login():
 @app.route("/autenticar", methods=['POST'])
 def autenticar():
     proxima_pagina = request.form['proxima']
-
-    if request.form['usuario'] in usuarios:
-        usuario = usuarios[request.form['usuario']]
+    usuario = usuario_dao.buscar_por_id(request.form['usuario'])
+    if usuario:
         if usuario.senha == request.form['senha']:
             session['usuario_logado'] = usuario.id
             flash(usuario.nome + ' logou com sucesso!')
