@@ -1,19 +1,14 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
+import psycopg2
+
+from models import Usuario, Jogo
+from dao import JogoDao
 
 app = Flask(__name__)
 app.secret_key = 'chave_secreta'
+app.config['DB_CONNECTION_STRING'] = 'dbname=jogoteca user=postgres password=postgres'
 
-class Jogo:
-    def __init__(self, nome, categoria, console):
-        self.nome = nome
-        self.categoria = categoria
-        self.console = console
-
-class Usuario:
-    def __init__(self, id, nome, senha):
-        self.id = id
-        self.nome = nome
-        self.senha = senha
+jogo_dao = JogoDao(app.config['DB_CONNECTION_STRING'])
 
 usuario1 = Usuario('alexandre', 'Alexandre Palota', '123')
 usuario2 = Usuario('fulano', 'Fulano de Tal', '456')
@@ -21,14 +16,9 @@ usuario3 = Usuario('beltrano', 'Beltrano de Tal', '789')
 
 usuarios = {usuario1.id: usuario1, usuario2.id: usuario2, usuario3.id: usuario3}
 
-jogo1 = Jogo('God of War', 'Aventura', 'Playstation 4')
-jogo2 = Jogo('Dark Souls 3', 'RPG ação', 'PC')
-jogo3 = Jogo('Sekiro', 'RPG Ação', 'PC')
-jogo4 = Jogo('Forza Horizon 5', 'Corrida', 'Xbox Series X')
-lista = [jogo1, jogo2, jogo3, jogo4]
-
 @app.route("/")
 def index():
+    lista = jogo_dao.listar()
     return render_template('lista.html', titulo='Jogos', jogos=lista)
 
 @app.route("/novo")
@@ -43,7 +33,7 @@ def criar():
     categoria = request.form['categoria']
     console = request.form['console']
     jogo = Jogo(nome, categoria, console)
-    lista.append(jogo)
+    jogo_dao.salvar(jogo)
     return redirect(url_for('index'))
 
 @app.route("/login")
