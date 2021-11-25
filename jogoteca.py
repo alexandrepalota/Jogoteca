@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, request, redirect, session, flash, url_for
 import psycopg2
 
@@ -7,6 +9,7 @@ from dao import JogoDao, UsuarioDao
 app = Flask(__name__)
 app.secret_key = 'chave_secreta'
 app.config['DB_CONNECTION_STRING'] = 'dbname=jogoteca user=postgres password=postgres'
+app.config['UPLOAD_PATH'] = os.path.dirname(os.path.abspath(__file__)) + '/uploads'
 
 jogo_dao = JogoDao(app.config['DB_CONNECTION_STRING'])
 usuario_dao = UsuarioDao(app.config['DB_CONNECTION_STRING'])
@@ -28,9 +31,10 @@ def criar():
     categoria = request.form['categoria']
     console = request.form['console']
     jogo = Jogo(nome, categoria, console)
-    jogo_dao.salvar(jogo)
+    jogo = jogo_dao.salvar(jogo)
     arquivo = request.files['arquivo']
-    arquivo.save(f'uploads/{arquivo.filename}')
+    upload_path = app.config['UPLOAD_PATH']
+    arquivo.save(f'{upload_path}/capa_{jogo.id}.jpg')
     return redirect(url_for('index'))
 
 @app.route("/editar/<id>")

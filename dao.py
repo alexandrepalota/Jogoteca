@@ -7,7 +7,7 @@ SQL_JOGO_POR_ID = 'SELECT id, nome, categoria, console from jogo where id = %s'
 SQL_USUARIO_POR_ID = 'SELECT id, nome, senha from usuario where id = %s'
 SQL_ATUALIZA_JOGO = 'UPDATE jogo SET nome=%s, categoria=%s, console=%s where id = %s'
 SQL_BUSCA_JOGOS = 'SELECT id, nome, categoria, console from jogo'
-SQL_CRIA_JOGO = 'INSERT into jogo (nome, categoria, console) values (%s, %s, %s)'
+SQL_CRIA_JOGO = 'INSERT into jogo (nome, categoria, console) values (%s, %s, %s) RETURNING id'
 
 
 class JogoDao:
@@ -22,7 +22,8 @@ class JogoDao:
             cursor.execute(SQL_ATUALIZA_JOGO, (jogo.nome, jogo.categoria, jogo.console, jogo.id))
         else:
             cursor.execute(SQL_CRIA_JOGO, (jogo.nome, jogo.categoria, jogo.console))
-            jogo.id = cursor.lastrowid
+            cursor.execute
+            jogo.id = cursor.fetchone()[0]
         conn.commit()
         conn.close()
         return jogo
