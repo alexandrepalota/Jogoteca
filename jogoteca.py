@@ -29,6 +29,8 @@ def criar():
     console = request.form['console']
     jogo = Jogo(nome, categoria, console)
     jogo_dao.salvar(jogo)
+    arquivo = request.files['arquivo']
+    arquivo.save(f'uploads/{arquivo.filename}')
     return redirect(url_for('index'))
 
 @app.route("/editar/<id>")
